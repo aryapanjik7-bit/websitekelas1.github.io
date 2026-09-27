@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Manajemen Kelas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#faf6f0;--card:#ffffff;--text:#2b2620;--muted:#8a8074;--line:#e9e1d4;
+  --accent:#b5562e;--accent-soft:#f3e2d3;--good:#3f7d4f;--bad:#c1443a;--warn:#b8862f;
+  --radius:14px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#1c1a17;--card:#252220;--text:#efe9e1;--muted:#a89d8e;--line:#3a352f;--accent-soft:#3a2b1f;
+  }
+}
+:root[data-theme="dark"]{--bg:#1c1a17;--card:#252220;--text:#efe9e1;--muted:#a89d8e;--line:#3a352f;--accent-soft:#3a2b1f}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',-apple-system,sans-serif;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  display:flex;min-height:100vh;flex-direction:column}
+.layout{display:flex;flex:1;max-width:1100px;margin:0 auto;width:100%}
+aside{width:210px;flex:none;padding:20px 12px;border-right:1px solid var(--line);
+  position:sticky;top:env(safe-area-inset-top,0px);align-self:flex-start;height:100vh}
+.brand{font-family:'Fraunces',serif;font-weight:700;font-size:1.2rem;margin:4px 8px 18px;color:var(--accent)}
+.brand small{display:block;font-family:'Inter',sans-serif;font-weight:500;font-size:.7rem;color:var(--muted);margin-top:2px}
+.adminbox{margin:0 4px 18px;padding:10px;background:var(--accent-soft);border-radius:10px;font-size:.78rem}
+.adminbox input{width:100%;margin-bottom:6px;padding:7px 8px;border-radius:6px;border:1px solid var(--line);font-size:.8rem}
+.adminbox button{width:100%;padding:7px;border:none;border-radius:6px;background:var(--accent);color:#fff;font-weight:600;cursor:pointer;font-size:.78rem}
+.adminstatus{font-size:.75rem;color:var(--good);font-weight:600;margin:0 4px 14px;display:flex;justify-content:space-between;align-items:center}
+.adminstatus a{color:var(--muted);cursor:pointer;font-weight:500;text-decoration:underline}
+nav{display:flex;flex-direction:column;gap:3px}
+nav button{text-align:left;border:none;background:transparent;color:var(--text);padding:10px 12px;
+  border-radius:8px;font-size:.88rem;cursor:pointer;font-weight:500;font-family:inherit}
+nav button.active{background:var(--accent);color:#fff;font-weight:600}
+.mobilenav{display:none}
+main{flex:1;padding:26px 24px;min-width:0}
+.topbar{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;flex-wrap:wrap;gap:6px}
+.topbar h1{font-family:'Fraunces',serif;font-size:1.5rem;margin:0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.03)}
+h2{margin:0 0 14px;font-size:1rem;font-family:'Fraunces',serif;color:var(--accent)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+input,select{padding:10px 12px;border:1px solid var(--line);border-radius:9px;background:var(--bg);
+  color:var(--text);font-size:.88rem;flex:1;min-width:110px;font-family:inherit}
+button.btn{padding:10px 16px;border:none;border-radius:9px;background:var(--accent);color:#fff;
+  font-size:.85rem;font-weight:600;cursor:pointer;font-family:inherit}
+button.btn.ghost{background:var(--accent-soft);color:var(--accent)}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+.twrap{overflow-x:auto}
+th,td{text-align:left;padding:9px 7px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:600;font-size:.72rem;text-transform:uppercase;letter-spacing:.03em}
+.badge{padding:3px 9px;border-radius:20px;font-size:.72rem;font-weight:700}
+.badge.hadir{background:#dff2e2;color:var(--good)}
+.badge.sakit{background:#faedd4;color:var(--warn)}
+.badge.izin{background:var(--accent-soft);color:var(--accent)}
+.badge.alpa{background:#f9dedb;color:var(--bad)}
+.del{cursor:pointer;color:var(--bad);font-weight:700;font-size:1rem;background:none;border:none;margin-left:4px}
+.edit{cursor:pointer;color:var(--accent);font-weight:700;font-size:.9rem;background:none;border:none}
+.muted{color:var(--muted);font-size:.82rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.statcard{background:var(--accent-soft);border-radius:10px;padding:14px}
+.stat{font-size:1.5rem;font-weight:700;font-family:'Fraunces',serif;color:var(--accent)}
+.tabpane{display:none}
+.tabpane.active{display:block}
+.kasplus{color:var(--good);font-weight:700}
+.kasminus{color:var(--bad);font-weight:700}
+.locked{opacity:.55;pointer-events:none;filter:grayscale(.3)}
+.lockmsg{font-size:.8rem;color:var(--muted);background:var(--accent-soft);padding:8px 12px;border-radius:8px;margin-bottom:10px}
+@media(max-width:760px){
+  aside{display:none}
+  .mobilenav{display:flex;gap:6px;overflow-x:auto;padding:10px 14px;background:var(--card);
+    border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:9}
+  .mobilenav button{flex:none;border:none;background:var(--accent-soft);color:var(--accent);
+    padding:8px 13px;border-radius:20px;font-size:.8rem;font-weight:600;cursor:pointer;white-space:nowrap}
+  .mobilenav button.active{background:var(--accent);color:#fff}
+  main{padding:18px 14px}
+  .grid2{grid-template-columns:1fr}
+  .adminbox,.adminstatus{margin:0 14px 12px}
+}
+</style>
+</head>
+<body>
+<div class="mobilenav" id="mobilenav"></div>
+<div class="layout">
+<aside>
+  <div class="brand" id="brandName">Kelasku<small>Manajemen Kelas</small></div>
+  <div id="loginArea">
+    <div class="adminbox">
+      <input type="password" id="pwInput" placeholder="Password admin">
+      <button onclick="tryLogin()">Masuk sebagai Admin</button>
+    </div>
+  </div>
+  <div id="statusArea" style="display:none">
+    <div class="adminstatus">🔓 Mode Admin <a onclick="logout()">keluar</a></div>
+  </div>
+  <nav id="tabs"></nav>
+</aside>
+<main>
+  <div class="tabpane active" id="tab-struktur">
+    <div class="topbar"><h1>Struktur Kelas</h1></div>
+    <div class="card">
+      <h2>Identitas Kelas</h2>
+      <div class="row admin-only">
+        <input id="namaKelas" placeholder="Nama Kelas (contoh: XI IPA 1)">
+        <input id="waliKelas" placeholder="Wali Kelas">
+        <button class="btn" onclick="simpanIdentitas()">Simpan</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Struktur Organisasi Kelas</h2>
+      <div class="row admin-only">
+        <input id="strJabatan" placeholder="Jabatan (Ketua, Wakil, dll)">
+        <input id="strNama" placeholder="Nama Siswa">
+        <button class="btn" onclick="tambahStruktur()">Tambah</button>
+      </div>
+      <div class="twrap"><table><thead><tr><th>Jabatan</th><th>Nama</th><th class="admin-only"></th></tr></thead>
+      <tbody id="strukturBody"></tbody></table></div>
+    </div>
+    <div class="card admin-only">
+      <h2>Ganti Password Admin</h2>
+      <div class="row">
+        <input type="password" id="pwBaru" placeholder="Password baru">
+        <button class="btn ghost" onclick="gantiPassword()">Ganti Password</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabpane" id="tab-jadwal">
+    <div class="topbar"><h1>Jadwal Pelajaran</h1></div>
+    <div class="card">
+      <div class="row admin-only">
+        <select id="jadHari"><option>Senin</option><option>Selasa</option><option>Rabu</option><option>Kamis</option><option>Jumat</option><option>Sabtu</option></select>
+        <input id="jadJam" placeholder="Jam (07:00-08:30)">
+        <input id="jadMapel" placeholder="Mata Pelajaran">
+        <input id="jadGuru" placeholder="Guru">
+        <button class="btn" onclick="tambahJadwal()">Tambah</button>
+      </div>
+      <div class="twrap"><table><thead><tr><th>Hari</th><th>Jam</th><th>Mapel</th><th>Guru</th><th class="admin-only"></th></tr></thead>
+      <tbody id="jadwalBody"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="tabpane" id="tab-piket">
+    <div class="topbar"><h1>Piket Kelas</h1></div>
+    <div class="card">
+      <div class="row admin-only">
+        <select id="piketHari"><option>Senin</option><option>Selasa</option><option>Rabu</option><option>Kamis</option><option>Jumat</option><option>Sabtu</option></select>
+        <select id="piketSiswa"></select>
+        <input id="piketExtra" placeholder="Nama lain (opsional, manual)">
+        <button class="btn" id="piketBtn" onclick="simpanPiket()">Tambah</button>
+      </div>
+      <div class="twrap"><table><thead><tr><th>Hari</th><th>Nama Petugas</th><th class="admin-only"></th></tr></thead>
+      <tbody id="piketBody"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="tabpane" id="tab-siswa">
+    <div class="topbar"><h1>Data Siswa</h1></div>
+    <div class="card">
+      <div class="row admin-only">
+        <input id="siNo" placeholder="No Absen" style="max-width:90px">
+        <input id="siNama" placeholder="Nama Lengkap">
+        <select id="siJk"><option>L</option><option>P</option></select>
+        <button class="btn" onclick="tambahSiswa()">Tambah</button>
+      </div>
+      <p class="muted" id="jmlSiswa"></p>
+      <div class="twrap"><table><thead><tr><th>No</th><th>Nama</th><th>JK</th><th class="admin-only"></th></tr></thead>
+      <tbody id="siswaBody"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="tabpane" id="tab-absensi">
+    <div class="topbar"><h1>Absensi Harian</h1></div>
+    <div class="card">
+      <div class="row admin-only">
+        <input type="date" id="absTanggal">
+        <select id="absSiswa"></select>
+        <select id="absStatus"><option value="hadir">Hadir</option><option value="sakit">Sakit</option><option value="izin">Izin</option><option value="alpa">Alpa</option></select>
+        <button class="btn" onclick="tambahAbsensi()">Catat</button>
+      </div>
+      <div class="twrap"><table><thead><tr><th>Tanggal</th><th>Nama</th><th>Status</th><th class="admin-only"></th></tr></thead>
+      <tbody id="absensiBody"></tbody></table></div>
+    </div>
+  </div>
+
+  <div class="tabpane" id="tab-kas">
+    <div class="topbar"><h1>Kas Kelas</h1></div>
+    <div class="grid2" style="margin-bottom:16px">
+      <div class="statcard"><div class="muted">Saldo Saat Ini</div><div class="stat" id="saldoKas">Rp 0</div></div>
+      <div class="statcard"><div class="muted">Jumlah Transaksi</div><div class="stat" id="jmlTransaksi">0</div></div>
+    </div>
+    <div class="card">
+      <div class="row admin-only">
+        <input type="date" id="kasTanggal">
+        <select id="kasJenis"><option value="masuk">Pemasukan</option><option value="keluar">Pengeluaran</option></select>
+        <input id="kasKet" placeholder="Keterangan">
+        <input id="kasJumlah" type="number" placeholder="Jumlah (Rp)">
+        <button class="btn" onclick="tambahKas()">Tambah</button>
+      </div>
+      <div class="twrap"><table><thead><tr><th>Tanggal</th><th>Keterangan</th><th>Jumlah</th><th class="admin-only"></th></tr></thead>
+      <tbody id="kasBody"></tbody></table></div>
+    </div>
+  </div>
+</main>
+</div>
+
+<script>
+const TABS=[["struktur","Struktur"],["jadwal","Jadwal"],["piket","Piket"],["siswa","Siswa"],["absensi","Absensi"],["kas","Kas Kelas"]];
+const navEl=document.getElementById('tabs'),mobEl=document.getElementById('mobilenav');
+TABS.forEach(([id,label],i)=>{
+  const b=document.createElement('button');b.textContent=label;b.onclick=()=>showTab(id);
+  if(i===0)b.classList.add('active');b.dataset.id=id;navEl.appendChild(b);
+  const mb=b.cloneNode(true);mb.onclick=()=>showTab(id);mobEl.appendChild(mb);
+});
+function showTab(id){
+  document.querySelectorAll('.tabpane').forEach(p=>p.classList.toggle('active',p.id==='tab-'+id));
+  document.querySelectorAll('nav button, .mobilenav button').forEach(b=>b.classList.toggle('active',b.dataset.id===id));
+}
+
+let DATA={pw:'admin123',identitas:{nama:'',wali:''},struktur:[],jadwal:[],piket:[],siswa:[],absensi:[],kas:[]};
+let isAdmin=false, editPiketId=null;
+
+function load(){try{const raw=localStorage.getItem('kelasData3');if(raw)DATA=Object.assign(DATA,JSON.parse(raw));}catch(e){}}
+function save(){try{localStorage.setItem('kelasData3',JSON.stringify(DATA));}catch(e){}}
+function fmtRp(n){return 'Rp '+Number(n||0).toLocaleString('id-ID');}
+function uid(){return Date.now()+Math.random().toString(36).slice(2,6);}
+
+function tryLogin(){
+  const v=document.getElementById('pwInput').value;
+  if(v===DATA.pw){
+    isAdmin=true;
+    document.getElementById('loginArea').style.display='none';
+    document.getElementById('statusArea').style.display='block';
+    applyLock();
+  } else { alert('Password salah'); }
+}
+function logout(){
+  isAdmin=false;
+  document.getElementById('loginArea').style.display='block';
+  document.getElementById('statusArea').style.display='none';
+  document.getElementById('pwInput').value='';
+  applyLock();
+}
+function gantiPassword(){
+  const v=document.getElementById('pwBaru').value.trim();
+  if(!v){alert('Isi password baru dulu');return;}
+  DATA.pw=v;save();document.getElementById('pwBaru').value='';
+  alert('Password admin berhasil diganti');
+}
+function applyLock(){
+  document.querySelectorAll('.admin-only').forEach(el=>el.classList.toggle('locked',!isAdmin));
+  renderAll();
+}
+
+function simpanIdentitas(){
+  if(!isAdmin)return;
+  DATA.identitas.nama=document.getElementById('namaKelas').value||DATA.identitas.nama;
+  DATA.identitas.wali=document.getElementById('waliKelas').value||DATA.identitas.wali;
+  save();renderIdentitas();
+}
+function renderIdentitas(){
+  document.getElementById('namaKelas').value=DATA.identitas.nama||'';
+  document.getElementById('waliKelas').value=DATA.identitas.wali||'';
+  document.getElementById('brandName').innerHTML=(DATA.identitas.nama||'Kelasku')+'<small>Manajemen Kelas</small>';
+}
+
+function tambahStruktur(){
+  if(!isAdmin)return;
+  const j=document.getElementById('strJabatan').value.trim(),n=document.getElementById('strNama').value.trim();
+  if(!j||!n)return;
+  DATA.struktur.push({id:uid(),jabatan:j,nama:n});
+  document.getElementById('strJabatan').value='';document.getElementById('strNama').value='';
+  save();renderStruktur();
+}
+function hapusStruktur(id){if(!isAdmin)return;DATA.struktur=DATA.struktur.filter(x=>x.id!==id);save();renderStruktur();}
+function renderStruktur(){
+  document.getElementById('strukturBody').innerHTML=DATA.struktur.map(s=>
+    `<tr><td>${s.jabatan}</td><td>${s.nama}</td><td class="admin-only ${isAdmin?'':'locked'}"><button class="del" onclick="hapusStruktur('${s.id}')">✕</button></td></tr>`
+  ).join('')||'<tr><td colspan="3" class="muted">Belum ada data</td></tr>';
+}
+
+function tambahJadwal(){
+  if(!isAdmin)return;
+  const hari=document.getElementById('jadHari').value,jam=document.getElementById('jadJam').value.trim(),
+    mapel=document.getElementById('jadMapel').value.trim(),guru=document.getElementById('jadGuru').value.trim();
+  if(!jam||!mapel)return;
+  DATA.jadwal.push({id:uid(),hari,jam,mapel,guru});
+  document.getElementById('jadJam').value='';document.getElementById('jadMapel').value='';document.getElementById('jadGuru').value='';
+  save();renderJadwal();
+}
+function hapusJadwal(id){if(!isAdmin)return;DATA.jadwal=DATA.jadwal.filter(x=>x.id!==id);save();renderJadwal();}
+function renderJadwal(){
+  const urutan=["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+  const sorted=[...DATA.jadwal].sort((a,b)=>urutan.indexOf(a.hari)-urutan.indexOf(b.hari));
+  document.getElementById('jadwalBody').innerHTML=sorted.map(j=>
+    `<tr><td>${j.hari}</td><td>${j.jam}</td><td>${j.mapel}</td><td>${j.guru||'-'}</td><td class="admin-only ${isAdmin?'':'locked'}"><button class="del" onclick="hapusJadwal('${j.id}')">✕</button></td></tr>`
+  ).join('')||'<tr><td colspan="5" class="muted">Belum ada jadwal</td></tr>';
+}
+
+function simpanPiket(){
+  if(!isAdmin)return;
+  const hari=document.getElementById('piketHari').value;
+  const nama=document.getElementById('piketExtra').value.trim()||document.getElementById('piketSiswa').value;
+  if(!nama)return;
+  if(editPiketId){
+    const p=DATA.piket.find(x=>x.id===editPiketId);
+    if(p){p.hari=hari;p.nama=nama;}
+    editPiketId=null;document.getElementById('piketBtn').textContent='Tambah';
+  } else {
+    DATA.piket.push({id:uid(),hari,nama});
+  }
+  document.getElementById('piketExtra').value='';
+  save();renderPiket();
+}
+function editPiket(id){
+  if(!isAdmin)return;
+  const p=DATA.piket.find(x=>x.id===id);if(!p)return;
+  document.getElementById('piketHari').value=p.hari;
+  document.getElementById('piketExtra').value=p.nama;
+  editPiketId=id;
+  document.getElementById('piketBtn').textContent='Update';
+  showTab('piket');
+  window.scrollTo(0,0);
+}
+function hapusPiket(id){if(!isAdmin)return;DATA.piket=DATA.piket.filter(x=>x.id!==id);save();renderPiket();}
+function renderPiket(){
+  const urutan=["Senin","Selasa","Rabu","Kamis","Jumat","Sabtu"];
+  const sorted=[...DATA.piket].sort((a,b)=>urutan.indexOf(a.hari)-urutan.indexOf(b.hari));
+  document.getElementById('piketBody').innerHTML=sorted.map(p=>
+    `<tr><td>${p.hari}</td><td>${p.nama}</td><td class="admin-only ${isAdmin?'':'locked'}"><button class="edit" onclick="editPiket('${p.id}')">✎</button><button class="del" onclick="hapusPiket('${p.id}')">✕</button></td></tr>`
+  ).join('')||'<tr><td colspan="3" class="muted">Belum ada jadwal piket</td></tr>';
+}
+
+function tambahSiswa(){
+  if(!isAdmin)return;
+  const no=document.getElementById('siNo').value.trim(),nama=document.getElementById('siNama').value.trim(),jk=document.getElementById('siJk').value;
+  if(!nama)return;
+  DATA.siswa.push({id:uid(),no:no||(DATA.siswa.length+1),nama,jk});
+  document.getElementById('siNo').value='';document.getElementById('siNama').value='';
+  save();renderSiswa();renderSelects();
+}
+function hapusSiswa(id){if(!isAdmin)return;DATA.siswa=DATA.siswa.filter(x=>x.id!==id);save();renderSiswa();renderSelects();}
+function renderSiswa(){
+  const sorted=[...DATA.siswa].sort((a,b)=>(+a.no)-(+b.no));
+  document.getElementById('siswaBody').innerHTML=sorted.map(s=>
+    `<tr><td>${s.no}</td><td>${s.nama}</td><td>${s.jk}</td><td class="admin-only ${isAdmin?'':'locked'}"><button class="del" onclick="hapusSiswa('${s.id}')">✕</button></td></tr>`
+  ).join('')||'<tr><td colspan="4" class="muted">Belum ada siswa</td></tr>';
+  document.getElementById('jmlSiswa').textContent=`Total: ${DATA.siswa.length} siswa`;
+}
+function renderSelects(){
+  const opts=DATA.siswa.map(s=>`<option value="${s.nama}">${s.nama}</option>`).join('');
+  document.getElementById('piketSiswa').innerHTML=opts||'<option value="">-- pilih dari daftar siswa --</option>';
+  document.getElementById('absSiswa').innerHTML=opts||'<option value="">Tambah siswa dulu</option>';
+}
+
+function tambahAbsensi(){
+  if(!isAdmin)return;
+  const tgl=document.getElementById('absTanggal').value,nama=document.getElementById('absSiswa').value,status=document.getElementById('absStatus').value;
+  if(!tgl||!nama)return;
+  DATA.absensi.push({id:uid(),tgl,nama,status});
+  save();renderAbsensi();
+}
+function hapusAbsensi(id){if(!isAdmin)return;DATA.absensi=DATA.absensi.filter(x=>x.id!==id);save();renderAbsensi();}
+function renderAbsensi(){
+  const sorted=[...DATA.absensi].sort((a,b)=>b.tgl.localeCompare(a.tgl));
+  document.getElementById('absensiBody').innerHTML=sorted.map(a=>
+    `<tr><td>${a.tgl}</td><td>${a.nama}</td><td><span class="badge ${a.status}">${a.status}</span></td><td class="admin-only ${isAdmin?'':'locked'}"><button class="del" onclick="hapusAbsensi('${a.id}')">✕</button></td></tr>`
+  ).join('')||'<tr><td colspan="4" class="muted">Belum ada catatan absensi</td></tr>';
+}
+
+function tambahKas(){
+  if(!isAdmin)return;
+  const tgl=document.getElementById('kasTanggal').value,jenis=document.getElementById('kasJenis').value,
+    ket=document.getElementById('kasKet').value.trim(),jumlah=parseFloat(document.getElementById('kasJumlah').value);
+  if(!tgl||!ket||!jumlah)return;
+  DATA.kas.push({id:uid(),tgl,jenis,ket,jumlah});
+  document.getElementById('kasKet').value='';document.getElementById('kasJumlah').value='';
+  save();renderKas();
+}
+function hapusKas(id){if(!isAdmin)return;DATA.kas=DATA.kas.filter(x=>x.id!==id);save();renderKas();}
+function renderKas(){
+  const sorted=[...DATA.kas].sort((a,b)=>b.tgl.localeCompare(a.tgl));
+  document.getElementById('kasBody').innerHTML=sorted.map(k=>
+    `<tr><td>${k.tgl}</td><td>${k.ket}</td><td class="${k.jenis==='masuk'?'kasplus':'kasminus'}">${k.jenis==='masuk'?'+':'-'}${fmtRp(k.jumlah)}</td><td class="admin-only ${isAdmin?'':'locked'}"><button class="del" onclick="hapusKas('${k.id}')">✕</button></td></tr>`
+  ).join('')||'<tr><td colspan="4" class="muted">Belum ada transaksi</td></tr>';
+  const saldo=DATA.kas.reduce((s,k)=>s+(k.jenis==='masuk'?k.jumlah:-k.jumlah),0);
+  document.getElementById('saldoKas').textContent=fmtRp(saldo);
+  document.getElementById('jmlTransaksi').textContent=DATA.kas.length;
+}
+
+function renderAll(){
+  renderIdentitas();renderStruktur();renderJadwal();renderSiswa();renderSelects();renderPiket();renderAbsensi();renderKas();
+  const t=document.getElementById('absTanggal'),t2=document.getElementById('kasTanggal');
+  const today=new Date().toISOString().slice(0,10);
+  if(!t.value)t.value=today;if(!t2.value)t2.value=today;
+  document.querySelectorAll('.admin-only').forEach(el=>el.classList.toggle('locked',!isAdmin));
+}
+load();renderAll();
+</script>
+</body>
+</html>
